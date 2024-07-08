@@ -18,6 +18,7 @@ type User struct {
 	Undo       int64     `gorm:"type:int;not null"`
 	PrivateKey string    `gorm:"type:varchar(200)"`
 	AddressTwo string    `gorm:"type:varchar(100)"`
+	Total      uint64    `gorm:"type:bigint;not null"`
 	CreatedAt  time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt  time.Time `gorm:"type:datetime;not null"`
 }
@@ -319,10 +320,12 @@ func (u *UserRepo) GetUserById(ctx context.Context, Id int64) (*biz.User, error)
 	}
 
 	return &biz.User{
-		ID:       user.ID,
-		Password: user.Password,
-		Address:  user.Address,
-		Undo:     user.Undo,
+		ID:         user.ID,
+		Password:   user.Password,
+		Address:    user.Address,
+		AddressTwo: user.AddressTwo,
+		Total:      user.Total,
+		Undo:       user.Undo,
 	}, nil
 }
 

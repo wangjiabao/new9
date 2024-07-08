@@ -22,6 +22,7 @@ type User struct {
 	PrivateKey string
 	Password   string
 	Undo       int64
+	Total      uint64
 	CreatedAt  time.Time
 }
 
