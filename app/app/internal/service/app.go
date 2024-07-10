@@ -54,14 +54,15 @@ func (a *AppService) EthAuthorize(ctx context.Context, req *v1.EthAuthorizeReque
 	//	return nil, errors.New(500, "AUTHORIZE_ERROR", "账户地址参数错误")
 	//}
 
-	if "" == userAddress {
+	if "" == userAddress || 10 > len(userAddress) {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "账户地址参数错误")
 	}
 
 	// 验证
 	var (
-		res bool
-		err error
+		res     bool
+		address string
+		err     error
 	)
 
 	var (
@@ -69,8 +70,8 @@ func (a *AppService) EthAuthorize(ctx context.Context, req *v1.EthAuthorizeReque
 		str2 = []byte(req.SendBody.PublicKey)
 	)
 
-	res, err = verifySig2(str1, str2, []byte(userAddress))
-	if !res || nil != err {
+	res, address, err = verifySig2(str1, str2, []byte("login"))
+	if !res || nil != err || 0 >= len(address) || userAddress != address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
 
@@ -352,7 +353,8 @@ func (a *AppService) Withdraw(ctx context.Context, req *v1.WithdrawRequest) (*v1
 	)
 
 	var (
-		user *biz.User
+		user    *biz.User
+		address string
 	)
 	user, err = a.uuc.GetUserByUserId(ctx, userId)
 	if nil != err {
@@ -366,8 +368,8 @@ func (a *AppService) Withdraw(ctx context.Context, req *v1.WithdrawRequest) (*v1
 		str2 = []byte(req.SendBody.PublicKey)
 	)
 
-	res, err = verifySig2(str1, str2, []byte(user.Address))
-	if !res || nil != err {
+	res, address, err = verifySig2(str1, str2, []byte("login"))
+	if !res || nil != err || 0 >= len(address) || address != user.Address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
 
@@ -894,26 +896,42 @@ func addressCheck(addressParam string) (bool, error) {
 //	)
 //}
 
-func verifySig2(sigHex []byte, publicKey []byte, msg []byte) (bool, error) {
+func verifySig2(sigHex []byte, publicKey []byte, msg []byte) (bool, string, error) {
 	// 启动
 	sdkClient := sdk.NewBCFWalletSDK()
 	var bCFSignUtil = sdkClient.NewBCFSignUtil("b")
 	defer sdkClient.Close()
 
-	// 创建keyPair
-	//bCFSignUtil_CreateKeypair, _ := bCFSignUtil.CreateKeypair("1234")
-	//address, _ := bCFSignUtil.GetAddressFromPublicKeyString(bCFSignUtil_CreateKeypair.PublicKey, "b")
-	//fmt.Println("secret:", bCFSignUtil_CreateKeypair.SecretKey, "publicKey", bCFSignUtil_CreateKeypair.PublicKey, "address:", address)
+	//// 创建keyPair
+	//bCFSignUtil_CreateKeypair, _ := bCFSignUtil.CreateKeypair("slice vintage better suit taste artist legend flag ozone silly brain battle")
+	//address2, _ := bCFSignUtil.GetAddressFromPublicKeyString(bCFSignUtil_CreateKeypair.PublicKey, "c")
+	//fmt.Println("secret:", bCFSignUtil_CreateKeypair.SecretKey, "publicKey", bCFSignUtil_CreateKeypair.PublicKey, "address:", address2)
 	//
 	//// 签名
-	//var ss = publicKey
-	//sign, _ := bCFSignUtil.SignToString(msg, ss)
+	//sign, _ := bCFSignUtil.SignToString("login", []byte(bCFSignUtil_CreateKeypair.SecretKey))
 	//fmt.Println("第一种签名方法的签名，sign:", sign)
 
+	var (
+		err     error
+		address string
+		res     bool
+	)
 	// 验证签名
-	//var signatureBuffer = sigHex                               // 第一种签名
-	//var publicKeyBuffer = publicKey // publicKey
-	return bCFSignUtil.DetachedVeriy(msg, sigHex, publicKey)
+	res, err = bCFSignUtil.DetachedVeriy(msg, sigHex, publicKey)
+	if !res {
+		return res, address, err
+	}
+
+	address, err = bCFSignUtil.GetAddressFromPublicKey(publicKey, "b")
+	if nil != err {
+		return res, address, err
+	}
+
+	if 0 > len(address) {
+		return false, "", nil
+	}
+
+	return res, address, err
 	//fmt.Println(res)
 }
 

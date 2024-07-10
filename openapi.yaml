@@ -812,8 +812,6 @@ components:
                 biwPrice:
                     type: number
                     format: double
-                balanceBiw:
-                    type: string
                 biwDaily:
                     type: string
                 buyNumTwo:
@@ -840,25 +838,13 @@ components:
                     type: string
                 sellNumSix:
                     type: string
-                dailyRate:
-                    type: number
-                    format: double
-                biwDailySpeed:
-                    type: number
-                    format: double
                 currentAmountBiw:
-                    type: string
-                recommendNum:
                     type: string
                 time:
                     type: string
                 balanceUsdt:
                     type: string
                 count:
-                    type: string
-                inviteUrl:
-                    type: string
-                inviteUserAddress:
                     type: string
                 exchangeRate:
                     type: number
@@ -869,10 +855,6 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/UserInfoReply_List'
-                withdrawList:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/UserInfoReply_ListWithdraw'
                 locationReward:
                     type: string
                 recommendReward:
@@ -903,14 +885,8 @@ components:
                     type: string
                 locationCurrentSub:
                     type: string
-                withdrawTotal:
-                    type: string
                 locationUsdtAll:
                     type: string
-                listReward:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/UserInfoReply_ListReward'
                 listRecommend:
                     type: array
                     items:
@@ -929,10 +905,56 @@ components:
                     type: string
                 status:
                     type: string
-                withdrawMin:
-                    type: string
                 buyLimit:
                     type: string
+                withdrawMin:
+                    type: number
+                    format: double
+                withdrawTotal:
+                    type: number
+                    format: double
+                balanceBiw:
+                    type: number
+                    format: double
+                dailyRate:
+                    type: number
+                    format: double
+                biwDailySpeed:
+                    type: number
+                    format: double
+                inviteUrl:
+                    type: string
+                inviteUserAddress:
+                    type: string
+                total:
+                    type: string
+                rewardFirst:
+                    type: number
+                    format: double
+                rewardSecond:
+                    type: number
+                    format: double
+                rewardThird:
+                    type: number
+                    format: double
+                recommendNum:
+                    type: string
+                listReward:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/UserInfoReply_ListReward'
+                first:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/UserInfoReply_ListFirst'
+                Second:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/UserInfoReply_ListSecond'
+                withdrawList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/UserInfoReply_ListWithdraw'
         UserInfoReply_List:
             type: object
             properties:
@@ -950,6 +972,11 @@ components:
                 usdtAmount:
                     type: string
                 created:
+                    type: string
+        UserInfoReply_ListFirst:
+            type: object
+            properties:
+                address:
                     type: string
         UserInfoReply_ListFour:
             type: object
@@ -973,12 +1000,19 @@ components:
                 type:
                     type: string
                 reward:
+                    type: number
+                    format: double
+        UserInfoReply_ListSecond:
+            type: object
+            properties:
+                address:
                     type: string
         UserInfoReply_ListWithdraw:
             type: object
             properties:
                 amount:
-                    type: string
+                    type: number
+                    format: double
                 createAt:
                     type: string
         WithdrawListReply:

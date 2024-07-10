@@ -277,7 +277,6 @@ message UserInfoRequest {
 
 message UserInfoReply {
 	double biwPrice = 1; // biw价格
-	string balanceBiw = 2; // biw余额
 	string biwDaily = 3; // biw24小时产出
 	int64 buyNumTwo = 4; // 可购买数量1
 	int64 buyNumThree = 5; // 可购买数量2
@@ -291,15 +290,10 @@ message UserInfoReply {
 	int64 sellNumFour = 12; // 卖出数量4
 	int64 sellNumFive = 13; // 卖出数量5
 	int64 sellNumSix = 91; // 卖出数量5
-	double daily_rate = 14; // 每日静态收益
-	double biwDailySpeed = 15; // biw产出速率
 	string currentAmountBiw = 16; // 待领取biw收益
-	int64 recommendNum = 17; // 邀请数量
 	int64 time = 18; // 服务器时间
 	string balanceUsdt = 19; // usdt余额
 	int64 count = 20; // 出局次数
-	string inviteUrl = 21; // 邀请链接
-	string inviteUserAddress = 22; // 直推人地址
 	double exchangeRate = 60; // 兑换手续费
 	int64 lastLevel = 62;
 	repeated List LocationList = 52; // 购买记录
@@ -307,12 +301,6 @@ message UserInfoReply {
 		string current = 2; // 收益
 		string currentMaxSubCurrent = 4; // 挖矿
 		string amount = 1; // 节点
-	}
-
-	repeated ListWithdraw withdrawList = 66; // 团队列表
-	message ListWithdraw {
-		string amount = 2; // 提现金额
-		string createAt = 1; // 提现时间
 	}
 
 	string locationReward = 25; // 挖矿收益 ,挖矿
@@ -335,15 +323,7 @@ message UserInfoReply {
 	string locationUsdt = 34; // 节点
 	string locationCurrentMaxSub = 35; //待领取，待产出
 	string locationCurrentSub = 36; //已产出
-	string withdrawTotal = 37; // 提现
 	string locationUsdtAll = 38; // 认购
-
-	repeated ListReward listReward = 39; // 收益列表，挖矿，分享，前四名
-	message ListReward {
-		string createdAt = 1; // 时间
-		int64 type = 2; // 类型，挖矿收益 type=1,分享 type=2, 前四名type =3,矩阵type=4
-		string reward = 3; // 数量
-	}
 
 	repeated ListRecommend listRecommend = 40; // 收益列表，挖矿，分享，前四名
 	message ListRecommend {
@@ -362,8 +342,44 @@ message UserInfoReply {
 	string configThree = 47;
 	string configFour = 48;
 	string status = 49;
-	int64 withdrawMin = 54;
 	int64 buyLimit = 55;
+
+	double dailyRate = 14; // 每日静态收益
+	double biwDailySpeed = 15; // 产出速率
+
+	double withdrawMin = 54; // 提现最小值
+	double withdrawTotal = 37; // 已提现biw总数
+	double balanceBiw = 2; // biw系统余额
+	string inviteUrl = 21; // 邀请链接
+	string inviteUserAddress = 22; // 直推人地址
+	int64 total = 106; // 我的购买数量
+	double rewardFirst = 100; // 挖矿收益
+	double rewardSecond = 101; // 节点收益
+	double rewardThird = 102; // 超级节点收益
+	int64 recommendNum = 109; // 直推人数
+
+	repeated ListReward listReward = 39; // 收益列表
+	message ListReward {
+		string createdAt = 1; // 时间
+		int64 type = 2; // 类型，挖矿收益 type=1, 节点收益 type=2, 超级节点收益type = 3 , type=4购买记录，type=5提现记录
+		double reward = 3; // 数量
+	}
+
+	repeated ListFirst first = 103; // 今日节点
+	message ListFirst {
+		string address = 1;
+	}
+
+	repeated ListSecond Second = 104; // 超级节点节点
+	message ListSecond {
+		string address = 1;
+	}
+
+	repeated ListWithdraw withdrawList = 66; // 团队列表
+	message ListWithdraw {
+		double amount = 2; // 提现金额
+		string createAt = 1; // 提现时间
+	}
 }
 
 message UserInfo1Reply {

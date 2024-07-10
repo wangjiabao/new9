@@ -153,6 +153,7 @@ type Reward struct {
 	CreatedAt        time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt        time.Time `gorm:"type:datetime;not null"`
 	AmountNew        float64   `gorm:"type:decimal(65,20);not null"`
+	Address          string    `gorm:"type:varchar(100);not null"`
 }
 
 type UserRepo struct {
@@ -471,8 +472,6 @@ func (u *UserRepo) CreateUser(ctx context.Context, uc *biz.User) (*biz.User, err
 	var user User
 	user.Address = uc.Address
 	user.Password = uc.Password
-	user.AddressTwo = uc.AddressTwo
-	user.PrivateKey = uc.PrivateKey
 	res := u.data.DB(ctx).Table("user").Create(&user)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_USER_ERROR", "用户创建失败")
@@ -1598,6 +1597,8 @@ func (ub *UserBalanceRepo) GetWithdrawByUserId2(ctx context.Context, userId int6
 			Status:          withdraw.Status,
 			Type:            withdraw.Type,
 			CreatedAt:       withdraw.CreatedAt,
+			AmountNew:       withdraw.AmountNew,
+			AmountNewRel:    withdraw.AmountNewRel,
 		})
 	}
 	return res, nil
@@ -2228,6 +2229,8 @@ func (ub *UserBalanceRepo) GetUserRewardByUserId(ctx context.Context, userId int
 			LocationType:     reward.LocationType,
 			CreatedAt:        reward.CreatedAt,
 			AmountB:          reward.AmountB,
+			AmountNew:        reward.AmountNew,
+			Address:          reward.Address,
 		})
 	}
 	return res, nil
