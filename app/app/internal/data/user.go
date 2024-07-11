@@ -2286,7 +2286,7 @@ func (ub *UserBalanceRepo) GetUserRewardTodayBuy(ctx context.Context) ([]*biz.Re
 	if err := ub.data.db.Table("reward").
 		Where("created_at>=?", todayStart).Where("created_at<?", todayEnd).
 		Where("reason=?", "buy").
-		Where("amoun_b>=?", 15000).
+		Where("amount_b>=?", 15000).
 		Find(&rewards).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, errors.NotFound("REWARD_NOT_FOUND", "reward not found")
