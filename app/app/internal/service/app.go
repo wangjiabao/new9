@@ -902,14 +902,14 @@ func verifySig2(sigHex []byte, publicKey []byte, msg []byte) (bool, string, erro
 	var bCFSignUtil = sdkClient.NewBCFSignUtil("b")
 	defer sdkClient.Close()
 
-	//// 创建keyPair
-	//bCFSignUtil_CreateKeypair, _ := bCFSignUtil.CreateKeypair("slice vintage better suit taste artist legend flag ozone silly brain battle")
-	//address2, _ := bCFSignUtil.GetAddressFromPublicKeyString(bCFSignUtil_CreateKeypair.PublicKey, "c")
-	//fmt.Println("secret:", bCFSignUtil_CreateKeypair.SecretKey, "publicKey", bCFSignUtil_CreateKeypair.PublicKey, "address:", address2)
-	//
-	//// 签名
-	//sign, _ := bCFSignUtil.SignToString("login", []byte(bCFSignUtil_CreateKeypair.SecretKey))
-	//fmt.Println("第一种签名方法的签名，sign:", sign)
+	// 创建keyPair
+	bCFSignUtil_CreateKeypair, _ := bCFSignUtil.CreateKeypair("abcd bcdd bcdva ccd")
+	address2, _ := bCFSignUtil.GetAddressFromPublicKeyString(bCFSignUtil_CreateKeypair.PublicKey, "b")
+	fmt.Println("secret:", bCFSignUtil_CreateKeypair.SecretKey, "publicKey", bCFSignUtil_CreateKeypair.PublicKey, "address:", address2)
+
+	// 签名
+	sign, _ := bCFSignUtil.SignToString("login", []byte(bCFSignUtil_CreateKeypair.SecretKey))
+	fmt.Println("第一种签名方法的签名，sign:", sign)
 
 	var (
 		err     error

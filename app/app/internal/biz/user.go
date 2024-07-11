@@ -341,15 +341,15 @@ func (uuc *UserUseCase) GetExistUserByAddressOrCreate(ctx context.Context, u *Us
 			}
 
 			var (
-				locationNew []*LocationNew
+				locationNew *User
 			)
-			locationNew, err = uuc.locationRepo.GetLocationsByUserId(ctx, userId)
+			locationNew, err = uuc.repo.GetUserById(ctx, userId)
 			if nil != err {
 				return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
 			}
 
-			if 0 == len(locationNew) {
-				return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+			if 0 >= locationNew.Total {
+				return nil, errors.New(500, "USER_ERROR", "推荐人未入金，无效的推荐码")
 			}
 
 			// 查询推荐人的相关信息
