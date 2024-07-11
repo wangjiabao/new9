@@ -1312,16 +1312,28 @@ func (uuc *UserUseCase) Withdraw(ctx context.Context, req *v1.WithdrawRequest, u
 	var (
 		configs      []*Config
 		withdrawRate float64
+		withdrawMin  float64
 	)
 	configs, err = uuc.configRepo.GetConfigByKeys(ctx,
 		"withdraw_rate",
+		"withdraw_min",
 	)
 	if nil != configs {
 		for _, vConfig := range configs {
 			if "withdraw_rate" == vConfig.KeyName {
 				withdrawRate, _ = strconv.ParseFloat(vConfig.Value, 10)
 			}
+
+			if "withdraw_win" == vConfig.KeyName {
+				withdrawMin, _ = strconv.ParseFloat(vConfig.Value, 10)
+			}
 		}
+	}
+
+	if amountFloat < withdrawMin {
+		return &v1.WithdrawReply{
+			Status: "提现不足最小值",
+		}, nil
 	}
 
 	//if "usdt_2" == req.SendBody.Type {
