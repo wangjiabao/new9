@@ -432,7 +432,6 @@ func (uuc *UserUseCase) UpdateUserRecommend(ctx context.Context, u *User, req *v
 		userId                int64
 		recommendUser         *UserRecommend
 		userRecommend         *UserRecommend
-		locations             []*LocationNew
 		myRecommendUser       *User
 		myUserRecommendUserId int64
 		Address               string
