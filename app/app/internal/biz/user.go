@@ -479,11 +479,14 @@ func (uuc *UserUseCase) UpdateUserRecommend(ctx context.Context, u *User, req *v
 		}
 
 		// 我的占位信息
-		locations, err = uuc.locationRepo.GetLocationsByUserId(ctx, u.ID)
+		var (
+			user *User
+		)
+		user, err = uuc.repo.GetUserById(ctx, myUserRecommendUserId)
 		if nil != err {
 			return nil, err
 		}
-		if nil != locations && 0 < len(locations) {
+		if user.Total > 0 {
 			return &v1.RecommendUpdateReply{InviteUserAddress: myRecommendUser.Address}, nil
 		}
 
