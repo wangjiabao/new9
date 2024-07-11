@@ -296,12 +296,6 @@ message UserInfoReply {
 	int64 count = 20; // 出局次数
 	double exchangeRate = 60; // 兑换手续费
 	int64 lastLevel = 62;
-	repeated List LocationList = 52; // 购买记录
-	message List {
-		string current = 2; // 收益
-		string currentMaxSubCurrent = 4; // 挖矿
-		string amount = 1; // 节点
-	}
 
 	string locationReward = 25; // 挖矿收益 ,挖矿
 	string recommendReward = 26; // 分享收益
@@ -319,16 +313,9 @@ message UserInfoReply {
 	int64 areaMax = 30; // 大区业绩
 	int64 areaMin = 31; // 小区业绩
 	int64 areaAll = 32; // 总业绩
-	int64 recommendTotal = 33; // 直推人数
-	string locationUsdt = 34; // 节点
 	string locationCurrentMaxSub = 35; //待领取，待产出
 	string locationCurrentSub = 36; //已产出
 	string locationUsdtAll = 38; // 认购
-
-	repeated ListRecommend listRecommend = 40; // 收益列表，挖矿，分享，前四名
-	message ListRecommend {
-		string address = 1; // 地址
-	}
 
 	repeated ListExchange listExchange = 41; // 收益列表，挖矿，分享，前四名
 	message ListExchange {
@@ -347,21 +334,28 @@ message UserInfoReply {
 	double dailyRate = 14; // 每日静态收益
 	double biwDailySpeed = 15; // 产出速率
 
+	int64 locationUsdt = 34; // 购买总数
 	double withdrawMin = 54; // 提现最小值
 	double withdrawTotal = 37; // 已提现biw总数
 	double balanceBiw = 2; // biw系统余额
-	string inviteUrl = 21; // 邀请链接
-	string inviteUserAddress = 22; // 直推人地址
-	int64 total = 106; // 我的购买数量
 	double rewardFirst = 100; // 挖矿收益
 	double rewardSecond = 101; // 节点收益
 	double rewardThird = 102; // 超级节点收益
+	string inviteUrl = 21; // 邀请链接
+	string inviteUserAddress = 22; // 邀请我的人地址
 	int64 recommendNum = 109; // 直推人数
+	int64 recommendTotal = 33; // 直推总金额
+
+	repeated List LocationList = 52; // 购买记录
+	message List {
+		uint64 amount = 1; // 金额
+		string createdAt = 2; // 时间
+	}
 
 	repeated ListReward listReward = 39; // 收益列表
 	message ListReward {
 		string createdAt = 1; // 时间
-		int64 type = 2; // 类型，挖矿收益 type=1, 节点收益 type=2, 超级节点收益type = 3 , type=4购买记录，type=5提现记录
+		int64 type = 2; // 类型，挖矿收益 type=1, 节点收益 type=2, 超级节点收益type = 3
 		double reward = 3; // 数量
 	}
 
@@ -375,10 +369,15 @@ message UserInfoReply {
 		string address = 1;
 	}
 
-	repeated ListWithdraw withdrawList = 66; // 团队列表
+	repeated ListWithdraw withdrawList = 66; // 提现列表
 	message ListWithdraw {
 		double amount = 2; // 提现金额
 		string createAt = 1; // 提现时间
+	}
+
+	repeated ListRecommend listRecommend = 40; // 我的直推下级
+	message ListRecommend {
+		string address = 1; // 地址
 	}
 }
 

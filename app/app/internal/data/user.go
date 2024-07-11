@@ -2263,6 +2263,51 @@ func (ub *UserBalanceRepo) GetUserRewardByUserIds(ctx context.Context, userIds .
 	return res, nil
 }
 
+// GetUserRewardTodayBuy .
+func (ub *UserBalanceRepo) GetUserRewardTodayBuy(ctx context.Context) ([]*biz.Reward, error) {
+	var rewards []*Reward
+
+	now := time.Now().UTC()
+	var startDate time.Time
+	var endDate time.Time
+	if 14 <= now.Hour() {
+		startDate = now
+		endDate = now.AddDate(0, 0, 1)
+	} else {
+		startDate = now.AddDate(0, 0, -1)
+		endDate = now
+	}
+
+	res := make([]*biz.Reward, 0)
+
+	todayStart := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 14, 0, 0, 0, time.UTC)
+	todayEnd := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 14, 0, 0, 0, time.UTC)
+
+	if err := ub.data.db.Table("reward").
+		Where("created_at>=?", todayStart).Where("created_at<?", todayEnd).
+		Where("reason=?", "buy").
+		Where("amoun_b>=?", 15000).
+		Find(&rewards).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("REWARD_NOT_FOUND", "reward not found")
+		}
+		return nil, errors.New(500, "REWARD ERROR", err.Error())
+	}
+
+	for _, vReward := range rewards {
+		res = append(res, &biz.Reward{
+			ID:        vReward.ID,
+			UserId:    vReward.UserId,
+			Amount:    vReward.Amount,
+			AmountB:   vReward.AmountB,
+			Address:   vReward.Address,
+			CreatedAt: vReward.CreatedAt,
+		})
+	}
+
+	return res, nil
+}
+
 // GetUserRewardTodayTotalByUserId .
 func (ub *UserBalanceRepo) GetUserRewardTodayTotalByUserId(ctx context.Context, userId int64) (*biz.UserSortRecommendReward, error) {
 	var total *UserSortRecommendReward

@@ -211,6 +211,7 @@ type UserBalanceRepo interface {
 	DepositDhb(ctx context.Context, userId int64, amount int64) (int64, error)
 	GetUserBalance(ctx context.Context, userId int64) (*UserBalance, error)
 	GetUserRewardByUserId(ctx context.Context, userId int64) ([]*Reward, error)
+	GetUserRewardTodayBuy(ctx context.Context) ([]*Reward, error)
 	GetLocationsToday(ctx context.Context) ([]*LocationNew, error)
 	GetUserRewardByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserSortRecommendReward, error)
 	GetUserRewards(ctx context.Context, b *Pagination, userId int64) ([]*Reward, error, int64)
@@ -519,45 +520,14 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		myUserRecommendUserId int64
 		inviteUserAddress     string
 		myRecommendUser       *User
-		//userInfo      *UserInfo
-		configs []*Config
-		//locations             []*LocationNew
-		userBalance *UserBalance
-		//buyOne                int64
-		//buyTwo                int64
-		//buyThree              int64
-		//buyFour               int64
-		//buyFive               int64
-		//buySix                int64
-		locationUsdt          string
-		locationCurrent       string
-		locationCurrentMaxSub string
-		locationBiw           int64
-		//total                 int64
-		//one                   int64
-		//two                   int64
-		//three                 int64
-		//four                  int64
-		lastLevel int64 = -1
-		//areaOne               int64
-		//areaTwo               int64
-		//areaThree             int64
-		//areaFour              int64
-		//areaFive              int64
-		configThree    string
-		configFour     string
-		totalYesReward int64
-		buyLimit       int64
-		withdrawMin    float64
+		configs               []*Config
+		userBalance           *UserBalance
+		buyLimit              int64
+		withdrawMin           float64
 	)
 
 	// 配置
 	configs, err = uuc.configRepo.GetConfigByKeys(ctx,
-		"one",
-		"twe",
-		"three",
-		"four",
-		"five",
 		"withdraw_min",
 	)
 	if nil != configs {
@@ -565,13 +535,6 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 			if "withdraw_min" == vConfig.KeyName {
 				withdrawMin, _ = strconv.ParseFloat(vConfig.Value, 10)
 			}
-			if "config_three" == vConfig.KeyName {
-				configThree = vConfig.Value
-			}
-			if "config_four" == vConfig.KeyName {
-				configFour = vConfig.Value
-			}
-
 		}
 	}
 
@@ -579,130 +542,6 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 	if nil != err {
 		return nil, err
 	}
-	//userInfo, err = uuc.uiRepo.GetUserInfoByUserId(ctx, myUser.ID)
-	//if nil != err {
-	//	return nil, err
-	//}
-
-	// 系统
-
-	//count6 := 0
-	//count1 := 0
-	//count2 := 0
-	//count3 := 0
-	//count4 := 0
-	//count5 :=0
-
-	// 入金
-	//locations, err = uuc.locationRepo.GetLocationsByUserId(ctx, myUser.ID)
-	//if nil != err {
-	//	return nil, err
-	//}
-	//var (
-	//	currentAmountBiw string
-	//)
-	//myLocations = make([]*v1.UserInfoReply_List, 0)
-	//if nil != locations && 0 < len(locations) {
-	//	for _, v := range locations {
-	//		var tmp int64
-	//		if v.Current <= v.CurrentMax {
-	//			tmp = v.CurrentMax - v.Current
-	//		}
-	//
-	//		locationBiw += v.Biw
-	//
-	//		if "running" == v.Status {
-	//			status = "running"
-	//			currentAmountBiw = fmt.Sprintf("%.2f", float64(tmp)/float64(100000))
-	//			areaAll = v.Total + v.TotalThree + v.TotalTwo
-	//			if v.TotalTwo >= v.Total && v.TotalTwo >= v.TotalThree {
-	//				areaMax = v.TotalTwo
-	//				areaMin = v.Total + v.TotalThree
-	//			}
-	//			if v.Total >= v.TotalTwo && v.Total >= v.TotalThree {
-	//				areaMax = v.Total
-	//				areaMin = v.TotalTwo + v.TotalThree
-	//			}
-	//			if v.TotalThree >= v.Total && v.TotalThree >= v.TotalTwo {
-	//				areaMax = v.TotalThree
-	//				areaMin = v.TotalTwo + v.Total
-	//			}
-	//			locationUsdt = fmt.Sprintf("%.2f", float64(v.Usdt)/float64(100000))
-	//
-	//			locationCurrent = fmt.Sprintf("%.2f", float64(v.Current)/float64(100000))
-	//			locationCurrentMaxSub = fmt.Sprintf("%.2f", float64(v.CurrentMax-v.Current)/float64(100000))
-	//		}
-	//
-	//		if "stop" == v.Status {
-	//			stopCount++
-	//		}
-	//
-	//		myLocations = append(myLocations, &v1.UserInfoReply_List{
-	//			Current:              fmt.Sprintf("%.2f", float64(v.Current)/float64(100000)),
-	//			CurrentMaxSubCurrent: fmt.Sprintf("%.2f", float64(tmp)/float64(100000)),
-	//			Amount:               fmt.Sprintf("%.2f", float64(v.CurrentMax)/float64(100000)/2.5),
-	//		})
-	//		var tmpLastLevel int64
-	//		// 1大区
-	//		if v.Total >= v.TotalTwo && v.Total >= v.TotalThree {
-	//			if areaOne <= v.TotalTwo+v.TotalThree {
-	//				tmpLastLevel = 1
-	//			}
-	//			if areaTwo <= v.TotalTwo+v.TotalThree {
-	//				tmpLastLevel = 2
-	//			}
-	//			if areaThree <= v.TotalTwo+v.TotalThree {
-	//				tmpLastLevel = 3
-	//			}
-	//			if areaFour <= v.TotalTwo+v.TotalThree {
-	//				tmpLastLevel = 4
-	//			}
-	//			if areaFive <= v.TotalTwo+v.TotalThree {
-	//				tmpLastLevel = 5
-	//			}
-	//		} else if v.TotalTwo >= v.Total && v.TotalTwo >= v.TotalThree {
-	//			if areaOne <= v.Total+v.TotalThree {
-	//				tmpLastLevel = 1
-	//			}
-	//			if areaTwo <= v.Total+v.TotalThree {
-	//				tmpLastLevel = 2
-	//			}
-	//			if areaThree <= v.Total+v.TotalThree {
-	//				tmpLastLevel = 3
-	//			}
-	//			if areaFour <= v.Total+v.TotalThree {
-	//				tmpLastLevel = 4
-	//			}
-	//			if areaFive <= v.Total+v.TotalThree {
-	//				tmpLastLevel = 5
-	//			}
-	//		} else if v.TotalThree >= v.Total && v.TotalThree >= v.TotalTwo {
-	//			if areaOne <= v.TotalTwo+v.Total {
-	//				tmpLastLevel = 1
-	//			}
-	//			if areaTwo <= v.TotalTwo+v.Total {
-	//				tmpLastLevel = 2
-	//			}
-	//			if areaThree <= v.TotalTwo+v.Total {
-	//				tmpLastLevel = 3
-	//			}
-	//			if areaFour <= v.TotalTwo+v.Total {
-	//				tmpLastLevel = 4
-	//			}
-	//			if areaFive <= v.TotalTwo+v.Total {
-	//				tmpLastLevel = 5
-	//			}
-	//		}
-	//
-	//		if tmpLastLevel > lastLevel {
-	//			lastLevel = tmpLastLevel
-	//		}
-	//
-	//		if v.LastLevel > lastLevel {
-	//			lastLevel = v.LastLevel
-	//		}
-	//	}
-	//}
 
 	// 余额，收益总数
 	userBalance, err = uuc.ubRepo.GetUserBalance(ctx, myUser.ID)
@@ -742,32 +581,22 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 	}
 	myRecommendList := make([]*v1.UserInfoReply_ListRecommend, 0)
 	if nil != myUserRecommend {
-		//for _, _ := range myUserRecommend {
-		//var (
-		//	tmpMyRecommendLocations []*LocationNew
-		//)
-		//tmpMyRecommendLocations, err = uuc.locationRepo.GetLocationsByUserId(ctx, vMyUserRecommend.UserId)
-		//if nil != err {
-		//	return nil, err
-		//}
+		for _, vMyUserRecommend := range myUserRecommend {
+			var (
+				myAllRecommendUser *User
+			)
+			myAllRecommendUser, err = uuc.repo.GetUserById(ctx, vMyUserRecommend.UserId)
+			if nil != err {
+				return nil, err
+			}
 
-		//if 0 < len(tmpMyRecommendLocations) {
-		//	recommendTotal++
-		//	var (
-		//		myAllRecommendUser *User
-		//	)
-		//	myAllRecommendUser, err = uuc.repo.GetUserById(ctx, vMyUserRecommend.UserId)
-		//	if nil != err {
-		//		return nil, err
-		//	}
-		//
-		//	if nil == myAllRecommendUser {
-		//		continue
-		//	}
-		//
-		//	myRecommendList = append(myRecommendList, &v1.UserInfoReply_ListRecommend{Address: myAllRecommendUser.Address})
-		//}
-		//}
+			if nil == myAllRecommendUser {
+				continue
+			}
+
+			recommendTotal += int64(myAllRecommendUser.Total)
+			myRecommendList = append(myRecommendList, &v1.UserInfoReply_ListRecommend{Address: myAllRecommendUser.Address})
+		}
 	}
 
 	// 提现
@@ -791,34 +620,21 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		})
 	}
 
-	// 16点之后执行
-	now := time.Now().UTC()
-	fmt.Println(now)
-	var start time.Time
-	if 16 >= now.Hour() {
-		start = time.Date(now.Year(), now.Month(), now.Day(), 16, 0, 0, 0, time.UTC)
-	} else {
-		now = time.Now().AddDate(0, 0, -1)
-		start = time.Date(now.Year(), now.Month(), now.Day(), 16, 0, 0, 0, time.UTC)
-	}
-
 	// 分红
 	var (
 		RewardFirst  float64
 		RewardSecond float64
 		RewardThird  float64
 		userRewards  []*Reward
+		rewardsBuy   []*Reward
 	)
+
 	listReward := make([]*v1.UserInfoReply_ListReward, 0)
-	first := make([]*v1.UserInfoReply_ListFirst, 0)
-	second := make([]*v1.UserInfoReply_ListSecond, 0)
+	LocationList := make([]*v1.UserInfoReply_List, 0)
 	userRewards, err = uuc.ubRepo.GetUserRewardByUserId(ctx, myUser.ID)
 	if nil != userRewards {
 		for _, vUserReward := range userRewards {
 			if "reward_first" == vUserReward.Reason {
-				//if vUserReward.CreatedAt.After(startDate) {
-				//	totalYesReward += vUserReward.Amount
-				//}
 				RewardFirst = vUserReward.AmountNew
 				listReward = append(listReward, &v1.UserInfoReply_ListReward{
 					CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
@@ -826,9 +642,6 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 					Type:      1,
 				})
 			} else if "reward_second" == vUserReward.Reason {
-				//if vUserReward.CreatedAt.After(startDate) {
-				//	totalYesReward += vUserReward.Amount
-				//}
 				RewardSecond = vUserReward.AmountNew
 				listReward = append(listReward, &v1.UserInfoReply_ListReward{
 					CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
@@ -836,9 +649,6 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 					Type:      2,
 				})
 			} else if "reward_third" == vUserReward.Reason {
-				//if vUserReward.CreatedAt.After(startDate) {
-				//	totalYesReward += vUserReward.Amount
-				//}
 				RewardThird = vUserReward.AmountNew
 				listReward = append(listReward, &v1.UserInfoReply_ListReward{
 					CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
@@ -846,178 +656,64 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 					Type:      3,
 				})
 			} else if "buy" == vUserReward.Reason {
-				//if vUserReward.CreatedAt.After(startDate) {
-				//	totalYesReward += vUserReward.Amount
-				//}
-
-				listReward = append(listReward, &v1.UserInfoReply_ListReward{
+				LocationList = append(LocationList, &v1.UserInfoReply_List{
+					Amount:    uint64(vUserReward.Amount),
 					CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
-					Reward:    float64(vUserReward.Amount),
-					Type:      4,
 				})
-
-				if vUserReward.CreatedAt.After(start) {
-					if 15000 >= vUserReward.Amount {
-						first = append(first, &v1.UserInfoReply_ListFirst{Address: vUserReward.Address})
-					} else if 30000 >= vUserReward.Amount {
-						second = append(second, &v1.UserInfoReply_ListSecond{Address: vUserReward.Address})
-					}
-				}
 			} else {
 				continue
 			}
 		}
 	}
 
-	// 全球
-	var (
-	//day                    = -1
-	////userLocationsYes       []*LocationNew
-	//userLocationsBef       []*LocationNew
-	//rewardLocationYes      int64
-	//rewardLocationBef      int64
-	//fourUserRecommendTotal map[int64]int64
-	)
+	first := make([]*v1.UserInfoReply_ListFirst, 0)
+	second := make([]*v1.UserInfoReply_ListSecond, 0)
+	rewardsBuy, err = uuc.ubRepo.GetUserRewardTodayBuy(ctx)
+	if nil != err {
+		return nil, err
+	}
 
-	//fourUserRecommendTotal = make(map[int64]int64, 0)
-	//userLocationsYes, err = uuc.locationRepo.GetLocationDailyYesterday(ctx, day)
-	//for _, userLocationYes := range userLocationsYes {
-	//	rewardLocationYes += userLocationYes.Usdt
-	//
-	//	// 获取直推
-	//
-	//	var (
-	//		fourUserRecommend         *UserRecommend
-	//		myFourUserRecommendUserId int64
-	//		//myFourRecommendUser *User
-	//	)
-	//	fourUserRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, userLocationYes.UserId)
-	//	if nil == fourUserRecommend {
-	//		continue
-	//	}
-	//
-	//	if "" != fourUserRecommend.RecommendCode {
-	//		tmpFourRecommendUserIds := strings.Split(fourUserRecommend.RecommendCode, "D")
-	//		if 2 <= len(tmpFourRecommendUserIds) {
-	//			myFourUserRecommendUserId, _ = strconv.ParseInt(tmpFourRecommendUserIds[len(tmpFourRecommendUserIds)-1], 10, 64) // 最后一位是直推人
-	//		}
-	//		//myFourRecommendUser, err = uuc.repo.GetUserById(ctx, myFourUserRecommendUserId)
-	//		//if nil != err {
-	//		//	return nil, err
-	//		//}
-	//
-	//		if _, ok := fourUserRecommendTotal[myFourUserRecommendUserId]; ok {
-	//			fourUserRecommendTotal[myFourUserRecommendUserId] += userLocationYes.Usdt
-	//		} else {
-	//			fourUserRecommendTotal[myFourUserRecommendUserId] = userLocationYes.Usdt
-	//		}
-	//	}
-	//}
+	for _, vRewardsBuy := range rewardsBuy {
+		if vRewardsBuy.AmountB < vRewardsBuy.Amount {
+			continue
+		}
 
-	// 前四名
-	//type KeyValuePair struct {
-	//	Key   int64
-	//	Value int64
-	//}
-	//var keyValuePairs []KeyValuePair
-	//for key, value := range fourUserRecommendTotal {
-	//	keyValuePairs = append(keyValuePairs, KeyValuePair{key, value})
-	//}
-	//
-	//// 按值排序切片
-	//sort.Slice(keyValuePairs, func(i, j int) bool {
-	//	return keyValuePairs[i].Value > keyValuePairs[j].Value
-	//})
-	//
-	//userLocationsBef, err = uuc.locationRepo.GetLocationDailyYesterday(ctx, day-1)
-	//for _, userLocationBef := range userLocationsBef {
-	//	rewardLocationBef += userLocationBef.Usdt
-	//}
-	//if rewardLocationYes > 0 {
-	//	totalRewardYes = rewardLocationYes / 100 * total
-	//}
-	//if rewardLocationBef > 0 {
-	//	totalRewardBef = rewardLocationBef / 100 / 100 * 30 * total
-	//}
-	//
-	//totalReward := rewardLocationYes/100/100*70*total + rewardLocationBef/100/100*30*total
-	//
-	//fourList := make([]*v1.UserInfoReply_ListFour, 0)
-	//
-	//// 获取前四项
-	//var topFour []KeyValuePair
-	//if 4 <= len(keyValuePairs) {
-	//	topFour = keyValuePairs[:4]
-	//} else {
-	//	topFour = keyValuePairs[:len(keyValuePairs)]
-	//}
-	//for k, vTopFour := range topFour {
-	//	var (
-	//		fourUser *User
-	//	)
-	//	fourUser, err = uuc.repo.GetUserById(ctx, vTopFour.Key)
-	//	if nil != err {
-	//		return nil, err
-	//	}
-	//
-	//	if nil == fourUser {
-	//		continue
-	//	}
-	//
-	//	var (
-	//		tmpMyRecommendAmount int64
-	//	)
-	//	if 0 == k {
-	//		tmpMyRecommendAmount = totalReward / 100 * one
-	//	} else if 1 == k {
-	//		tmpMyRecommendAmount = totalReward / 100 * two
-	//	} else if 2 == k {
-	//		tmpMyRecommendAmount = totalReward / 100 * three
-	//	} else if 3 == k {
-	//		tmpMyRecommendAmount = totalReward / 100 * four
-	//	}
-	//
-	//	var address1 string
-	//	if 20 <= len(fourUser.Address) {
-	//		address1 = fourUser.Address[:6] + "..." + fourUser.Address[len(fourUser.Address)-4:]
-	//	}
-	//	fourList = append(fourList, &v1.UserInfoReply_ListFour{
-	//		Location: address1,
-	//		Amount:   fmt.Sprintf("%.2f", float64(vTopFour.Value)/float64(100000)),
-	//		Reward:   fmt.Sprintf("%.2f", float64(tmpMyRecommendAmount)/float64(100000)),
-	//	})
-	//}
+		// 超级
+		if 30000 <= vRewardsBuy.AmountB {
+			if 30000 <= vRewardsBuy.AmountB-vRewardsBuy.Amount { // 已经是超级节点
+				continue
+			}
+
+			second = append(second, &v1.UserInfoReply_ListSecond{Address: vRewardsBuy.Address})
+		} else if 15000 <= vRewardsBuy.AmountB {
+			if 15000 <= vRewardsBuy.AmountB-vRewardsBuy.Amount { // 已经是节点
+				continue
+			}
+
+			first = append(first, &v1.UserInfoReply_ListFirst{Address: vRewardsBuy.Address})
+		}
+	}
 
 	return &v1.UserInfoReply{
-		WithdrawTotal:         withdrawAmount,
-		BalanceBiw:            userBalance.BalanceDhb,
-		DailyRate:             0,
-		BiwDailySpeed:         0,
-		RecommendNum:          int64(len(myUserRecommend)),
-		Time:                  time.Now().Unix(),
-		WithdrawList:          withdrawList,
-		InviteUserAddress:     inviteUserAddress,
-		InviteUrl:             encodeString,
-		RecommendTotal:        recommendTotal,
-		LocationUsdt:          locationUsdt,
-		LocationCurrentMaxSub: locationCurrentMaxSub,
-		LocationCurrentSub:    locationCurrent,
-		LocationUsdtAll:       "",
-		ListReward:            listReward,
-		ListRecommend:         myRecommendList,
-		LastLevel:             lastLevel,
-		ConfigFour:            configFour,
-		ConfigOne:             fmt.Sprintf("%.2f", float64(locationBiw)/float64(100000)),
-		ConfigThree:           configThree,
-		ConfigTwo:             fmt.Sprintf("%.2f", float64(totalYesReward)/float64(100000)),
-		WithdrawMin:           withdrawMin,
-		BuyLimit:              buyLimit,
-		RewardFirst:           RewardFirst,
-		RewardSecond:          RewardSecond,
-		RewardThird:           RewardThird,
-		Total:                 int64(myUser.Total),
-		First:                 nil,
-		Second:                nil,
+		WithdrawTotal:     withdrawAmount,
+		BalanceBiw:        userBalance.BalanceDhb,
+		RecommendNum:      int64(len(myUserRecommend)),
+		Time:              time.Now().Unix(),
+		WithdrawList:      withdrawList,
+		InviteUserAddress: inviteUserAddress,
+		InviteUrl:         encodeString,
+		RecommendTotal:    recommendTotal,
+		LocationUsdt:      int64(myUser.Total),
+		ListReward:        listReward,
+		ListRecommend:     myRecommendList,
+		WithdrawMin:       withdrawMin,
+		BuyLimit:          buyLimit,
+		RewardFirst:       RewardFirst,
+		RewardSecond:      RewardSecond,
+		RewardThird:       RewardThird,
+		First:             first,
+		Second:            second,
+		LocationList:      LocationList,
 	}, nil
 }
 func (uuc *UserUseCase) UserArea(ctx context.Context, req *v1.UserAreaRequest, user *User) (*v1.UserAreaReply, error) {

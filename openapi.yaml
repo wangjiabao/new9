@@ -851,10 +851,6 @@ components:
                     format: double
                 lastLevel:
                     type: string
-                LocationList:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/UserInfoReply_List'
                 locationReward:
                     type: string
                 recommendReward:
@@ -877,20 +873,12 @@ components:
                     type: string
                 areaAll:
                     type: string
-                recommendTotal:
-                    type: string
-                locationUsdt:
-                    type: string
                 locationCurrentMaxSub:
                     type: string
                 locationCurrentSub:
                     type: string
                 locationUsdtAll:
                     type: string
-                listRecommend:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/UserInfoReply_ListRecommend'
                 listExchange:
                     type: array
                     items:
@@ -907,6 +895,14 @@ components:
                     type: string
                 buyLimit:
                     type: string
+                dailyRate:
+                    type: number
+                    format: double
+                biwDailySpeed:
+                    type: number
+                    format: double
+                locationUsdt:
+                    type: string
                 withdrawMin:
                     type: number
                     format: double
@@ -916,18 +912,6 @@ components:
                 balanceBiw:
                     type: number
                     format: double
-                dailyRate:
-                    type: number
-                    format: double
-                biwDailySpeed:
-                    type: number
-                    format: double
-                inviteUrl:
-                    type: string
-                inviteUserAddress:
-                    type: string
-                total:
-                    type: string
                 rewardFirst:
                     type: number
                     format: double
@@ -937,8 +921,18 @@ components:
                 rewardThird:
                     type: number
                     format: double
+                inviteUrl:
+                    type: string
+                inviteUserAddress:
+                    type: string
                 recommendNum:
                     type: string
+                recommendTotal:
+                    type: string
+                LocationList:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/UserInfoReply_List'
                 listReward:
                     type: array
                     items:
@@ -955,14 +949,16 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/UserInfoReply_ListWithdraw'
+                listRecommend:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/UserInfoReply_ListRecommend'
         UserInfoReply_List:
             type: object
             properties:
-                current:
-                    type: string
-                currentMaxSubCurrent:
-                    type: string
                 amount:
+                    type: string
+                createdAt:
                     type: string
         UserInfoReply_ListExchange:
             type: object
