@@ -720,67 +720,60 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 }
 func (uuc *UserUseCase) UserArea(ctx context.Context, req *v1.UserAreaRequest, user *User) (*v1.UserAreaReply, error) {
 	var (
-		err             error
-		locationId      = req.LocationId
-		Locations       []*LocationNew
-		LocationRunning *LocationNew
+		err           error
+		userRecommend *UserRecommend
+		myCode        string
 	)
 
 	res := make([]*v1.UserAreaReply_List, 0)
-	if 0 >= locationId {
-		Locations, err = uuc.locationRepo.GetLocationsByUserId(ctx, user.ID)
-		if nil != err {
-			return nil, err
-		}
-		for _, vLocations := range Locations {
-			if "running" == vLocations.Status {
-				LocationRunning = vLocations
-				break
-			}
-		}
 
-		if nil == LocationRunning {
-			return &v1.UserAreaReply{Area: res}, nil
-		}
+	// 推荐
+	userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, req.LocationId)
+	if nil == userRecommend {
+		return nil, err
+	}
 
-		locationId = LocationRunning.ID
+	myCode = "D" + strconv.FormatInt(req.LocationId, 10)
+	if "" != userRecommend.RecommendCode {
+		myCode = userRecommend.RecommendCode + myCode
+	}
+
+	if 0 >= len(myCode) {
+		return nil, nil
 	}
 
 	var (
-		myLowLocations []*LocationNew
+		myUserRecommend []*UserRecommend
 	)
-
-	myLowLocations, err = uuc.locationRepo.GetLocationsByTop(ctx, locationId)
+	myUserRecommend, err = uuc.urRepo.GetUserRecommendByCode(ctx, myCode)
 	if nil != err {
 		return nil, err
 	}
 
-	for _, vMyLowLocations := range myLowLocations {
-		var (
-			userLow           *User
-			tmpMyLowLocations []*LocationNew
-		)
+	if nil != myUserRecommend {
+		for _, vMyUserRecommend := range myUserRecommend {
+			var (
+				myAllRecommendUser *User
+			)
+			myAllRecommendUser, err = uuc.repo.GetUserById(ctx, vMyUserRecommend.UserId)
+			if nil != err {
+				return nil, err
+			}
 
-		userLow, err = uuc.repo.GetUserById(ctx, vMyLowLocations.UserId)
-		if nil != err {
-			continue
+			if nil == myAllRecommendUser {
+				continue
+			}
+
+			var address1 string
+			if 20 <= len(myAllRecommendUser.Address) {
+				address1 = myAllRecommendUser.Address[:6] + "..." + myAllRecommendUser.Address[len(myAllRecommendUser.Address)-4:]
+			}
+			res = append(res, &v1.UserAreaReply_List{
+				Address:    address1,
+				LocationId: myAllRecommendUser.ID,
+				CountLow:   0,
+			})
 		}
-
-		tmpMyLowLocations, err = uuc.locationRepo.GetLocationsByTop(ctx, vMyLowLocations.ID)
-		if nil != err {
-			return nil, err
-		}
-
-		var address1 string
-		if 20 <= len(userLow.Address) {
-			address1 = userLow.Address[:6] + "..." + userLow.Address[len(userLow.Address)-4:]
-		}
-
-		res = append(res, &v1.UserAreaReply_List{
-			Address:    address1,
-			LocationId: vMyLowLocations.ID,
-			CountLow:   int64(len(tmpMyLowLocations)),
-		})
 	}
 
 	return &v1.UserAreaReply{Area: res}, nil

@@ -167,11 +167,14 @@ func (a *AppService) RecommendUpdate(ctx context.Context, req *v1.RecommendUpdat
 	}
 
 	var (
-		res             bool
-		addressFromSign string
+		address string
+		res     bool
+		str1    = []byte(req.SendBody.Sign)
+		str2    = []byte(req.SendBody.PublicKey)
 	)
-	res, addressFromSign = verifySig(req.SendBody.Sign, []byte(user.Address))
-	if !res || addressFromSign != user.Address {
+
+	res, address, err = verifySig2(str1, str2, []byte("login"))
+	if !res || nil != err || 0 >= len(address) || user.Address != address {
 		return nil, errors.New(500, "AUTHORIZE_ERROR", "地址签名错误")
 	}
 
