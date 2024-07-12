@@ -722,18 +722,21 @@ func (uuc *UserUseCase) UserArea(ctx context.Context, req *v1.UserAreaRequest, u
 	var (
 		err           error
 		userRecommend *UserRecommend
+		locationId    = req.LocationId
 		myCode        string
 	)
 
 	res := make([]*v1.UserAreaReply_List, 0)
-
+	if 0 >= locationId {
+		locationId = user.ID
+	}
 	// 推荐
-	userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, req.LocationId)
+	userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, locationId)
 	if nil == userRecommend {
 		return nil, err
 	}
 
-	myCode = "D" + strconv.FormatInt(req.LocationId, 10)
+	myCode = "D" + strconv.FormatInt(locationId, 10)
 	if "" != userRecommend.RecommendCode {
 		myCode = userRecommend.RecommendCode + myCode
 	}
