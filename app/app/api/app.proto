@@ -346,6 +346,8 @@ message UserInfoReply {
 	int64 recommendNum = 109; // 直推人数
 	int64 recommendTotal = 33; // 直推总金额
  	string Address = 111;
+	 int64 kkdt = 112;
+	 int64 uudt = 113;
 
 	repeated List LocationList = 52; // 购买记录
 	message List {

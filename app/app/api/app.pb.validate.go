@@ -1234,6 +1234,10 @@ func (m *UserInfoReply) validate(all bool) error {
 
 	// no validation rules for Address
 
+	// no validation rules for Kkdt
+
+	// no validation rules for Uudt
+
 	for idx, item := range m.GetLocationList() {
 		_, _ = idx, item
 

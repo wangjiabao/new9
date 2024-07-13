@@ -23,6 +23,8 @@ type User struct {
 	Password   string
 	Undo       int64
 	Total      uint64
+	Kkdt       int64
+	Uudt       int64
 	CreatedAt  time.Time
 }
 
@@ -717,6 +719,8 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		First:             first,
 		Second:            second,
 		LocationList:      LocationList,
+		Kkdt:              myUser.Kkdt,
+		Uudt:              myUser.Uudt,
 	}, nil
 }
 func (uuc *UserUseCase) UserArea(ctx context.Context, req *v1.UserAreaRequest, user *User) (*v1.UserAreaReply, error) {

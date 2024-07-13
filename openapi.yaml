@@ -931,6 +931,10 @@ components:
                     type: string
                 Address:
                     type: string
+                kkdt:
+                    type: string
+                uudt:
+                    type: string
                 LocationList:
                     type: array
                     items:
