@@ -472,6 +472,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, uc *biz.User) (*biz.User, err
 	var user User
 	user.Address = uc.Address
 	user.Password = uc.Password
+	user.AddressTwo = uc.AddressTwo
 	res := u.data.DB(ctx).Table("user").Create(&user)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_USER_ERROR", "用户创建失败")

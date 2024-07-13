@@ -1232,6 +1232,8 @@ func (m *UserInfoReply) validate(all bool) error {
 
 	// no validation rules for RecommendTotal
 
+	// no validation rules for Address
+
 	for idx, item := range m.GetLocationList() {
 		_, _ = idx, item
 

@@ -360,17 +360,17 @@ func (uuc *UserUseCase) GetExistUserByAddressOrCreate(ctx context.Context, u *Us
 		}
 
 		// 创建私钥
-		//var (
-		//	address    string
-		//	privateKey string
-		//)
-		//address, privateKey, err = generateKey()
-		//if 0 >= len(address) || 0 >= len(privateKey) || err != nil {
-		//	return nil, errors.New(500, "USER_ERROR", "生成地址错误")
-		//}
-		//
-		//u.PrivateKey = privateKey
-		//u.AddressTwo = address
+		var (
+			address    string
+			privateKey string
+		)
+		address, privateKey, err = generateKey()
+		if 0 >= len(address) || 0 >= len(privateKey) || err != nil {
+			return nil, errors.New(500, "USER_ERROR", "生成地址错误")
+		}
+
+		u.PrivateKey = privateKey
+		u.AddressTwo = address
 
 		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 			user, err = uuc.repo.CreateUser(ctx, u) // 用户创建
@@ -697,6 +697,7 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 	}
 
 	return &v1.UserInfoReply{
+		Address:           myUser.AddressTwo,
 		WithdrawTotal:     withdrawAmount,
 		BalanceBiw:        userBalance.BalanceDhb,
 		RecommendNum:      int64(len(myUserRecommend)),
