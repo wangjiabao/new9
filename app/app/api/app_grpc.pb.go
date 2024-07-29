@@ -32,6 +32,7 @@ const (
 	App_RecommendList_FullMethodName       = "/api.App/RecommendList"
 	App_PasswordChange_FullMethodName      = "/api.App/PasswordChange"
 	App_Withdraw_FullMethodName            = "/api.App/Withdraw"
+	App_Buy_FullMethodName                 = "/api.App/Buy"
 	App_Exchange_FullMethodName            = "/api.App/Exchange"
 	App_Trade_FullMethodName               = "/api.App/Trade"
 	App_Tran_FullMethodName                = "/api.App/Tran"
@@ -62,6 +63,7 @@ type AppClient interface {
 	RecommendList(ctx context.Context, in *RecommendListRequest, opts ...grpc.CallOption) (*RecommendListReply, error)
 	PasswordChange(ctx context.Context, in *PasswordChangeRequest, opts ...grpc.CallOption) (*PasswordChangeReply, error)
 	Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*WithdrawReply, error)
+	Buy(ctx context.Context, in *BuyRequest, opts ...grpc.CallOption) (*BuyReply, error)
 	Exchange(ctx context.Context, in *ExchangeRequest, opts ...grpc.CallOption) (*ExchangeReply, error)
 	Trade(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*WithdrawReply, error)
 	Tran(ctx context.Context, in *TranRequest, opts ...grpc.CallOption) (*TranReply, error)
@@ -223,6 +225,15 @@ func (c *appClient) Withdraw(ctx context.Context, in *WithdrawRequest, opts ...g
 	return out, nil
 }
 
+func (c *appClient) Buy(ctx context.Context, in *BuyRequest, opts ...grpc.CallOption) (*BuyReply, error) {
+	out := new(BuyReply)
+	err := c.cc.Invoke(ctx, App_Buy_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *appClient) Exchange(ctx context.Context, in *ExchangeRequest, opts ...grpc.CallOption) (*ExchangeReply, error) {
 	out := new(ExchangeReply)
 	err := c.cc.Invoke(ctx, App_Exchange_FullMethodName, in, out, opts...)
@@ -339,6 +350,7 @@ type AppServer interface {
 	RecommendList(context.Context, *RecommendListRequest) (*RecommendListReply, error)
 	PasswordChange(context.Context, *PasswordChangeRequest) (*PasswordChangeReply, error)
 	Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error)
+	Buy(context.Context, *BuyRequest) (*BuyReply, error)
 	Exchange(context.Context, *ExchangeRequest) (*ExchangeReply, error)
 	Trade(context.Context, *WithdrawRequest) (*WithdrawReply, error)
 	Tran(context.Context, *TranRequest) (*TranReply, error)
@@ -418,6 +430,9 @@ func (UnimplementedAppServer) PasswordChange(context.Context, *PasswordChangeReq
 }
 func (UnimplementedAppServer) Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Withdraw not implemented")
+}
+func (UnimplementedAppServer) Buy(context.Context, *BuyRequest) (*BuyReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Buy not implemented")
 }
 func (UnimplementedAppServer) Exchange(context.Context, *ExchangeRequest) (*ExchangeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Exchange not implemented")
@@ -699,6 +714,24 @@ func _App_Withdraw_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_Buy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BuyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).Buy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: App_Buy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).Buy(ctx, req.(*BuyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _App_Exchange_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExchangeRequest)
 	if err := dec(in); err != nil {
@@ -955,6 +988,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Withdraw",
 			Handler:    _App_Withdraw_Handler,
+		},
+		{
+			MethodName: "Buy",
+			Handler:    _App_Buy_Handler,
 		},
 		{
 			MethodName: "Exchange",

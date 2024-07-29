@@ -21,6 +21,7 @@ type User struct {
 	Total      uint64    `gorm:"type:bigint;not null"`
 	Kkdt       int64     `gorm:"column:kkdt;type:int;not null"`
 	Uudt       int64     `gorm:"column:uudt;type:int;not null"`
+	Amount     uint64    `gorm:"type:bigint;not null"`
 	CreatedAt  time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt  time.Time `gorm:"type:datetime;not null"`
 }
@@ -311,6 +312,64 @@ func (c *ConfigRepo) UpdateConfig(ctx context.Context, id int64, value string) (
 	return true, nil
 }
 
+// UpdateUserNewTwoNew .
+func (u *UserRepo) UpdateUserNewTwoNew(ctx context.Context, userId int64, amount uint64, strUpdate string, uudt int64, kkdt int64) error {
+	res := u.data.DB(ctx).Table("user").Where("id=? and amount >= ?", userId, amount).
+		Updates(map[string]interface{}{"total": gorm.Expr("total + ?", amount), "amount": gorm.Expr("amount - ?", amount), strUpdate: gorm.Expr(strUpdate+" + ?", 1), "kkdt": gorm.Expr("kkdt + ?", kkdt), "uudt": gorm.Expr("uudt + ?", uudt)})
+	if res.Error != nil {
+		return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
+	}
+
+	return nil
+}
+
+// InRecordNew .
+func (u *UserRepo) InRecordNew(ctx context.Context, userId int64, address string, amount int64, originTotal int64) error {
+	var err error
+	var reward Reward
+	reward.UserId = userId
+	reward.Amount = amount
+	reward.AmountB = amount + originTotal
+	reward.Address = address
+	reward.Type = "buy"   // 本次分红的行为类型
+	reward.Reason = "buy" // 给我分红的理由
+	err = u.data.DB(ctx).Table("reward").Create(&reward).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserRepo) GetEthUserRecordListByUserId(ctx context.Context, userId int64) ([]*biz.EthUserRecord, error) {
+	var ethUserRecord []*EthUserRecord
+
+	res := make([]*biz.EthUserRecord, 0)
+	if err := u.data.DB(ctx).Table("eth_user_record").Where("user_id=?", userId).Find(&ethUserRecord).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("USER_RECOMMEND_NOT_FOUND", "user recommend not found")
+		}
+
+		return nil, errors.New(500, "USER RECOMMEND ERROR", err.Error())
+	}
+
+	for _, item := range ethUserRecord {
+		res = append(res, &biz.EthUserRecord{
+			ID:        item.ID,
+			UserId:    item.UserId,
+			Hash:      item.Hash,
+			Status:    item.Status,
+			Type:      item.Type,
+			Amount:    item.Amount,
+			AmountTwo: item.AmountTwo,
+			CoinType:  item.CoinType,
+			CreatedAt: item.CreatedAt,
+		})
+	}
+
+	return res, nil
+}
+
 // GetUserById .
 func (u *UserRepo) GetUserById(ctx context.Context, Id int64) (*biz.User, error) {
 	var user User
@@ -331,6 +390,7 @@ func (u *UserRepo) GetUserById(ctx context.Context, Id int64) (*biz.User, error)
 		Undo:       user.Undo,
 		Kkdt:       user.Kkdt,
 		Uudt:       user.Uudt,
+		Amount:     user.Amount,
 	}, nil
 }
 

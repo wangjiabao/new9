@@ -22,6 +22,7 @@ type User struct {
 	PrivateKey string
 	Password   string
 	Undo       int64
+	Amount     uint64
 	Total      uint64
 	Kkdt       int64
 	Uudt       int64
@@ -296,6 +297,9 @@ type UserRepo interface {
 	GetUsers(ctx context.Context, b *Pagination, address string) ([]*User, error, int64)
 	GetUserCount(ctx context.Context) (int64, error)
 	GetUserCountToday(ctx context.Context) (int64, error)
+	UpdateUserNewTwoNew(ctx context.Context, userId int64, amount uint64, strUpdate string, uudt int64, kkdt int64) error
+	InRecordNew(ctx context.Context, userId int64, address string, amount int64, originTotal int64) error
+	GetEthUserRecordListByUserId(ctx context.Context, userId int64) ([]*EthUserRecord, error)
 }
 
 func NewUserUseCase(repo UserRepo, tx Transaction, configRepo ConfigRepo, uiRepo UserInfoRepo, urRepo UserRecommendRepo, locationRepo LocationRepo, userCurrentMonthRecommendRepo UserCurrentMonthRecommendRepo, ubRepo UserBalanceRepo, logger log.Logger) *UserUseCase {
@@ -624,6 +628,22 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		})
 	}
 
+	// 充值
+	var (
+		userEth []*EthUserRecord
+	)
+	userEth, err = uuc.repo.GetEthUserRecordListByUserId(ctx, myUser.ID)
+	if nil != err {
+		return nil, err
+	}
+	listUserEth := make([]*v1.UserInfoReply_ListEthRecord, 0)
+	for _, vUserEth := range userEth {
+		listUserEth = append(listUserEth, &v1.UserInfoReply_ListEthRecord{
+			Amount:    vUserEth.AmountTwo,
+			CreatedAt: vUserEth.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
+		})
+	}
+
 	// 分红
 	var (
 		RewardFirst  float64
@@ -718,7 +738,9 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		RewardThird:       RewardThird,
 		First:             first,
 		Second:            second,
+		ListEth:           listUserEth,
 		LocationList:      LocationList,
+		Amount:            myUser.Amount,
 		Kkdt:              myUser.Kkdt,
 		Uudt:              myUser.Uudt,
 	}, nil
@@ -1245,6 +1267,74 @@ func (uuc *UserUseCase) Exchange(ctx context.Context, req *v1.ExchangeRequest, u
 		Status: "ok",
 	}, nil
 
+}
+
+func (uuc *UserUseCase) Buy(ctx context.Context, req *v1.BuyRequest, user *User) (*v1.BuyReply, error) {
+	var (
+		amount    = req.SendBody.Amount
+		strUpdate string
+		kkdt      int64
+		uudt      int64
+		err       error
+	)
+
+	if 30000 <= amount {
+		strUpdate = "total_f"
+		amount = 30000
+		kkdt = 15000
+		uudt = 30000
+	} else if 15000 <= amount {
+		strUpdate = "total_d"
+		amount = 15000
+		kkdt = 7500
+		uudt = 15000
+	} else if 5000 <= amount {
+		strUpdate = "total_c"
+		amount = 5000
+		kkdt = 2500
+		uudt = 5000
+	} else if 3000 <= amount {
+		strUpdate = "total_b"
+		amount = 3000
+		kkdt = 1500
+		uudt = 3000
+	} else if 1000 <= amount {
+		strUpdate = "total_a"
+		amount = 1000
+		kkdt = 500
+		uudt = 1000
+	} else {
+		return &v1.BuyReply{
+			Status: "无效金额",
+		}, nil
+	}
+
+	if amount > user.Amount {
+		return &v1.BuyReply{
+			Status: "余额不足",
+		}, nil
+	}
+
+	if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		err = uuc.repo.UpdateUserNewTwoNew(ctx, user.ID, amount, strUpdate, uudt, kkdt)
+		if nil != err {
+			return err
+		}
+
+		// 充值记录
+		err = uuc.repo.InRecordNew(ctx, user.ID, user.Address, int64(amount), int64(user.Total))
+		if nil != err {
+			return err
+		}
+
+		return nil
+	}); nil != err {
+		return nil, err
+	}
+
+	return &v1.BuyReply{
+		Status: "ok",
+	}, nil
 }
 
 func (uuc *UserUseCase) Withdraw(ctx context.Context, req *v1.WithdrawRequest, user *User, password string) (*v1.WithdrawReply, error) {

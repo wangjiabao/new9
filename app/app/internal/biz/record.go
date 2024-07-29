@@ -7,13 +7,15 @@ import (
 )
 
 type EthUserRecord struct {
-	ID       int64
-	UserId   int64
-	Hash     string
-	Status   string
-	Type     string
-	Amount   string
-	CoinType string
+	ID        int64
+	UserId    int64
+	Hash      string
+	Status    string
+	Type      string
+	Amount    string
+	AmountTwo uint64
+	CoinType  string
+	CreatedAt time.Time
 }
 
 type Location struct {

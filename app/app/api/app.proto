@@ -92,6 +92,13 @@ service App {
 		};
 	};
 
+	rpc Buy (BuyRequest) returns (BuyReply) {
+		option (google.api.http) = {
+			post: "/api/app_server/buy"
+			body: "send_body"
+		};
+	};
+
 	rpc Exchange (ExchangeRequest) returns (ExchangeReply) {
 		option (google.api.http) = {
 			post: "/api/app_server/exchange"
@@ -348,9 +355,16 @@ message UserInfoReply {
  	string Address = 111;
 	 int64 kkdt = 112;
 	 int64 uudt = 113;
+	 uint64 amount = 114;
 
 	repeated List LocationList = 52; // 购买记录
 	message List {
+		uint64 amount = 1; // 金额
+		string createdAt = 2; // 时间
+	}
+
+	repeated ListEthRecord ListEth = 115; // 购买记录
+	message ListEthRecord {
 		uint64 amount = 1; // 金额
 		string createdAt = 2; // 时间
 	}
@@ -601,6 +615,20 @@ message WithdrawRequest {
 }
 
 message WithdrawReply {
+	string status = 1;
+}
+
+message BuyRequest {
+	message SendBody{
+		uint64 amount = 1;
+		string sign = 4;
+		string publicKey = 5;
+	}
+
+	SendBody send_body = 1;
+}
+
+message BuyReply {
 	string status = 1;
 }
 
