@@ -975,6 +975,12 @@ components:
                     type: string
                 amount:
                     type: string
+                fiveAmounts:
+                    type: number
+                    format: double
+                fourAmounts:
+                    type: number
+                    format: double
                 LocationList:
                     type: array
                     items:

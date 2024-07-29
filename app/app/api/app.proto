@@ -356,6 +356,8 @@ message UserInfoReply {
 	 int64 kkdt = 112;
 	 int64 uudt = 113;
 	 uint64 amount = 114;
+	 double fiveAmounts = 119;
+	double fourAmounts = 120;
 
 	repeated List LocationList = 52; // 购买记录
 	message List {

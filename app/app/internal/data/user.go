@@ -18,7 +18,13 @@ type User struct {
 	Undo       int64     `gorm:"type:int;not null"`
 	PrivateKey string    `gorm:"type:varchar(200)"`
 	AddressTwo string    `gorm:"type:varchar(100)"`
+	Last       uint64    `gorm:"type:bigint;not null"`
 	Total      uint64    `gorm:"type:bigint;not null"`
+	TotalA     int64     `gorm:"type:int;not null"`
+	TotalB     int64     `gorm:"type:int;not null"`
+	TotalC     int64     `gorm:"type:int;not null"`
+	TotalD     int64     `gorm:"type:int;not null"`
+	TotalF     int64     `gorm:"type:int;not null"`
 	Kkdt       int64     `gorm:"column:kkdt;type:int;not null"`
 	Uudt       int64     `gorm:"column:uudt;type:int;not null"`
 	Amount     uint64    `gorm:"type:bigint;not null"`
@@ -364,6 +370,37 @@ func (u *UserRepo) GetEthUserRecordListByUserId(ctx context.Context, userId int6
 			AmountTwo: item.AmountTwo,
 			CoinType:  item.CoinType,
 			CreatedAt: item.CreatedAt,
+		})
+	}
+
+	return res, nil
+}
+
+// GetUsersNew .
+func (u *UserRepo) GetUsersNew(ctx context.Context) ([]*biz.User, error) {
+	var users []*User
+	if err := u.data.db.Table("user").Where("total>=?", 1000).Find(&users).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("USER_NOT_FOUND", "user not found")
+		}
+
+		return nil, errors.New(500, "USER ERROR", err.Error())
+	}
+
+	res := make([]*biz.User, 0)
+	for _, item := range users {
+		res = append(res, &biz.User{
+			ID:         item.ID,
+			Address:    item.Address,
+			AddressTwo: item.AddressTwo,
+			PrivateKey: item.PrivateKey,
+			Last:       item.Last,
+			TotalA:     item.TotalA,
+			TotalB:     item.TotalB,
+			TotalC:     item.TotalC,
+			TotalD:     item.TotalD,
+			TotalF:     item.TotalF,
+			Total:      item.Total,
 		})
 	}
 

@@ -26,6 +26,12 @@ type User struct {
 	Total      uint64
 	Kkdt       int64
 	Uudt       int64
+	Last       uint64
+	TotalA     int64
+	TotalB     int64
+	TotalC     int64
+	TotalD     int64
+	TotalF     int64
 	CreatedAt  time.Time
 }
 
@@ -300,6 +306,7 @@ type UserRepo interface {
 	UpdateUserNewTwoNew(ctx context.Context, userId int64, amount uint64, strUpdate string, uudt int64, kkdt int64) error
 	InRecordNew(ctx context.Context, userId int64, address string, amount int64, originTotal int64) error
 	GetEthUserRecordListByUserId(ctx context.Context, userId int64) ([]*EthUserRecord, error)
+	GetUsersNew(ctx context.Context) ([]*User, error)
 }
 
 func NewUserUseCase(repo UserRepo, tx Transaction, configRepo ConfigRepo, uiRepo UserInfoRepo, urRepo UserRecommendRepo, locationRepo LocationRepo, userCurrentMonthRecommendRepo UserCurrentMonthRecommendRepo, ubRepo UserBalanceRepo, logger log.Logger) *UserUseCase {
@@ -532,19 +539,149 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		userBalance           *UserBalance
 		buyLimit              int64
 		withdrawMin           float64
+		one                   float64
+		two                   float64
+		three                 float64
+		four                  float64
+		five                  float64
+		six                   float64
+		oneTwo                float64
+		twoTwo                float64
+		threeTwo              float64
+		fiveThree             float64
+		fourThree             float64
 	)
 
 	// 配置
 	configs, err = uuc.configRepo.GetConfigByKeys(ctx,
-		"withdraw_min",
+		"withdraw_min", "one", "two", "three", "four", "five", "six",
+		"one_two", "two_two", "three_two", "four_two", "five_two", "four_three", "five_three",
 	)
 	if nil != configs {
 		for _, vConfig := range configs {
 			if "withdraw_min" == vConfig.KeyName {
 				withdrawMin, _ = strconv.ParseFloat(vConfig.Value, 10)
+			} else if "one" == vConfig.KeyName {
+				one, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "two" == vConfig.KeyName {
+				two, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "three" == vConfig.KeyName {
+				three, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "four" == vConfig.KeyName {
+				four, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "five" == vConfig.KeyName {
+				five, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "six" == vConfig.KeyName {
+				six, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "one_two" == vConfig.KeyName {
+				oneTwo, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "two_two" == vConfig.KeyName {
+				twoTwo, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "three_two" == vConfig.KeyName {
+				threeTwo, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "four_three" == vConfig.KeyName {
+				fourThree, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
+			} else if "five_three" == vConfig.KeyName {
+				fiveThree, err = strconv.ParseFloat(vConfig.Value, 10)
+				if nil != err {
+					return nil, err
+				}
 			}
 		}
 	}
+
+	var (
+		users []*User
+	)
+	users, err = uuc.repo.GetUsersNew(ctx)
+	if nil != err {
+		fmt.Println("分红", err)
+		return nil, nil
+	}
+
+	var (
+		amountSecond float64 // 节点超级节点奖励额度
+		amounts      float64
+	)
+	for _, vUsers := range users {
+		// 超级节点，节点
+		number := vUsers.Total
+		if 15000 <= number {
+			for number > 0 {
+				if 1000000 <= number {
+					number -= 1000000
+					amounts += six
+				} else if 30000 <= number {
+					number -= 30000
+					amounts += five
+				} else if 15000 <= number {
+					number -= 15000
+					amounts += four
+				} else if 5000 <= number {
+					number -= 5000
+					amounts += three
+					amountSecond += threeTwo
+				} else if 3000 <= number {
+					number -= 3000
+					amounts += two
+					amountSecond += twoTwo
+				} else if 1000 <= number {
+					number -= 1000
+					amounts += one
+					amountSecond += oneTwo
+				} else {
+					break
+				}
+			}
+		} else {
+			// 普通
+			for i := 0; i < int(vUsers.TotalA); i++ {
+				amounts += one
+				amountSecond += oneTwo
+			}
+			for i := 0; i < int(vUsers.TotalB); i++ {
+				amounts += two
+				amountSecond += twoTwo
+			}
+			for i := 0; i < int(vUsers.TotalC); i++ {
+				amounts += three
+				amountSecond += threeTwo
+			}
+		}
+	}
+
+	fourAmounts := amountSecond * fourThree / 100
+	fiveAmounts := amountSecond * fiveThree / 100
 
 	myUser, err = uuc.repo.GetUserById(ctx, user.ID)
 	if nil != err {
@@ -743,6 +880,8 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 		Amount:            myUser.Amount,
 		Kkdt:              myUser.Kkdt,
 		Uudt:              myUser.Uudt,
+		FourAmounts:       fourAmounts,
+		FiveAmounts:       fiveAmounts,
 	}, nil
 }
 func (uuc *UserUseCase) UserArea(ctx context.Context, req *v1.UserAreaRequest, user *User) (*v1.UserAreaReply, error) {

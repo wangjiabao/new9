@@ -1240,6 +1240,10 @@ func (m *UserInfoReply) validate(all bool) error {
 
 	// no validation rules for Amount
 
+	// no validation rules for FiveAmounts
+
+	// no validation rules for FourAmounts
+
 	for idx, item := range m.GetLocationList() {
 		_, _ = idx, item
 
