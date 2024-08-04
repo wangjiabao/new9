@@ -321,7 +321,7 @@ func (c *ConfigRepo) UpdateConfig(ctx context.Context, id int64, value string) (
 // UpdateUserNewTwoNew .
 func (u *UserRepo) UpdateUserNewTwoNew(ctx context.Context, userId int64, amount uint64, strUpdate string, uudt int64, kkdt int64) error {
 	res := u.data.DB(ctx).Table("user").Where("id=? and amount >= ?", userId, amount).
-		Updates(map[string]interface{}{"total": gorm.Expr("total + ?", amount), "amount": gorm.Expr("amount - ?", amount), strUpdate: gorm.Expr(strUpdate+" + ?", 1), "kkdt": gorm.Expr("kkdt + ?", kkdt), "uudt": gorm.Expr("uudt + ?", uudt)})
+		Updates(map[string]interface{}{"total": gorm.Expr("total + ?", amount), "amount": gorm.Expr("amount - ?", amount), strUpdate: gorm.Expr(strUpdate+" + ?", 1), "kkdt": gorm.Expr("kkdt + ?", kkdt)})
 	if res.Error != nil {
 		return errors.New(500, "UPDATE_USER_ERROR", "用户信息修改失败")
 	}
