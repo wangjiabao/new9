@@ -1412,36 +1412,92 @@ func (uuc *UserUseCase) Buy(ctx context.Context, req *v1.BuyRequest, user *User)
 	var (
 		amount    = req.SendBody.Amount
 		strUpdate string
-		kkdt      int64
+		kkdt      uint64
 		uudt      int64
 		err       error
 	)
 
+	var (
+		configs []*Config
+		kkdtA   uint64
+		kkdtB   uint64
+		kkdtC   uint64
+		kkdtD   uint64
+		kkdtE   uint64
+		kkdtF   uint64
+		kkdtG   uint64
+		kkdtH   uint64
+	)
+	configs, err = uuc.configRepo.GetConfigByKeys(ctx,
+		"kkdt_a", "kkdt_b", "kkdt_c", "kkdt_d", "kkdt_e", "kkdt_f", "kkdt_g", "kkdt_h",
+	)
+	if nil != configs {
+		for _, vConfig := range configs {
+			if "kkdt_a" == vConfig.KeyName {
+				kkdtA, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+			}
+			if "kkdt_b" == vConfig.KeyName {
+				kkdtB, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+			}
+			if "kkdt_c" == vConfig.KeyName {
+				kkdtC, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+			}
+			if "kkdt_d" == vConfig.KeyName {
+				kkdtD, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+			}
+			if "kkdt_e" == vConfig.KeyName {
+				kkdtE, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+			}
+			if "kkdt_f" == vConfig.KeyName {
+				kkdtF, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+			}
+			if "kkdt_g" == vConfig.KeyName {
+				kkdtG, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+			}
+			if "kkdt_h" == vConfig.KeyName {
+				kkdtH, _ = strconv.ParseUint(vConfig.Value, 10, 64)
+			}
+
+		}
+	}
+
 	if 30000 <= amount {
 		strUpdate = "total_f"
 		amount = 30000
-		kkdt = 15000
+		kkdt = kkdtA
 		uudt = 30000
 	} else if 15000 <= amount {
 		strUpdate = "total_d"
 		amount = 15000
-		kkdt = 7500
+		kkdt = kkdtB
 		uudt = 15000
 	} else if 5000 <= amount {
 		strUpdate = "total_c"
 		amount = 5000
-		kkdt = 2500
+		kkdt = kkdtC
 		uudt = 5000
 	} else if 3000 <= amount {
 		strUpdate = "total_b"
 		amount = 3000
-		kkdt = 1500
+		kkdt = kkdtD
 		uudt = 3000
 	} else if 1000 <= amount {
 		strUpdate = "total_a"
 		amount = 1000
-		kkdt = 500
+		kkdt = kkdtE
 		uudt = 1000
+	} else if 500 <= amount {
+		strUpdate = "total_h"
+		amount = 500
+		kkdt = kkdtF
+	} else if 300 <= amount {
+		strUpdate = "total_i"
+		amount = 300
+		kkdt = kkdtG
+	} else if 100 <= amount {
+		strUpdate = "total_j"
+		amount = 100
+		kkdt = kkdtH
 	} else {
 		return &v1.BuyReply{
 			Status: "无效金额",
@@ -1455,7 +1511,7 @@ func (uuc *UserUseCase) Buy(ctx context.Context, req *v1.BuyRequest, user *User)
 	}
 
 	if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-		err = uuc.repo.UpdateUserNewTwoNew(ctx, user.ID, amount, strUpdate, uudt, kkdt)
+		err = uuc.repo.UpdateUserNewTwoNew(ctx, user.ID, amount, strUpdate, uudt, int64(kkdt))
 		if nil != err {
 			return err
 		}
