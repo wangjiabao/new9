@@ -347,28 +347,28 @@ func (uuc *UserUseCase) GetExistUserByAddressOrCreate(ctx context.Context, u *Us
 			decodeBytes, err = base64.StdEncoding.DecodeString(code)
 			code = string(decodeBytes)
 			if 1 >= len(code) {
-				return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+				return nil, errors.New(500, "USER_ERROR", "无效的推荐码1")
 			}
 			if userId, err = strconv.ParseInt(code[1:], 10, 64); 0 >= userId || nil != err {
-				return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+				return nil, errors.New(500, "USER_ERROR", "无效的推荐码2")
 			}
 
 			var (
 				locationNew *User
 			)
 			locationNew, err = uuc.repo.GetUserById(ctx, userId)
-			if nil != err {
-				return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+			if nil != err || nil == locationNew {
+				return nil, errors.New(500, "USER_ERROR", "无效的推荐码3")
 			}
 
-			if 0 >= locationNew.Total {
-				return nil, errors.New(500, "USER_ERROR", "推荐人未入金，无效的推荐码")
-			}
+			//if 0 >= locationNew.Total {
+			//	return nil, errors.New(500, "USER_ERROR", "推荐人未入金，无效的推荐码")
+			//}
 
 			// 查询推荐人的相关信息
 			recommendUser, err = uuc.urRepo.GetUserRecommendByUserId(ctx, userId)
 			if err != nil {
-				return nil, errors.New(500, "USER_ERROR", "无效的推荐码")
+				return nil, errors.New(500, "USER_ERROR", "无效的推荐码4")
 			}
 		}
 
