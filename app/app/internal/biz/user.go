@@ -856,7 +856,7 @@ func (uuc *UserUseCase) UserInfo(ctx context.Context, user *User) (*v1.UserInfoR
 	}
 
 	return &v1.UserInfoReply{
-		Address:           myUser.AddressTwo,
+		Address:           "暂未开放",
 		WithdrawTotal:     withdrawAmount,
 		BalanceBiw:        userBalance.BalanceDhb,
 		RecommendNum:      int64(len(myUserRecommend)),
